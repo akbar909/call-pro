@@ -312,11 +312,8 @@
             ]
         };
 
-        // Signaling server URL - CHANGE THIS TO YOUR SERVER URL
-        // const SIGNALING_SERVER = 'http://localhost:3000';
-        const SIGNALING_SERVER = window.location.hostname === 'localhost' 
-    ? 'http://localhost:3000' 
-    : `http://${window.location.hostname}:3000`;
+        // Signaling server URL - automatically uses same domain
+        const SIGNALING_SERVER = window.location.origin;
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function () {

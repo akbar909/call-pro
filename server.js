@@ -26,7 +26,10 @@ const io = socketIo(server, {
     cors: {
         origin: '*',
         methods: ['GET', 'POST']
-    }
+    },
+    transports: ['websocket', 'polling'],
+    pingTimeout: 60000,
+    pingInterval: 25000
 });
 
 // Store active rooms and users
@@ -45,12 +48,31 @@ io.on('connection', (socket) => {
         }
         
         const room = rooms.get(roomId);
-        room.set(userId, { id: userId, name: userName, socketId: socket.id });
         
-        const existingUsers = Array.from(room.values()).filter(user => user.id !== userId);
+        // Store with socket.id as key for reliable lookup
+        room.set(socket.id, { 
+            id: userId, 
+            name: userName, 
+            socketId: socket.id 
+        });
+        
+        // Get existing users BEFORE emitting
+        const existingUsers = Array.from(room.values())
+            .filter(user => user.socketId !== socket.id)
+            .map(user => ({
+                id: user.socketId,  // Send socket.id for signaling
+                name: user.name
+            }));
+        
+        console.log(`Sending ${existingUsers.length} existing users to ${userName}`);
+        
+        // Send existing users to new user FIRST
         socket.emit('existing-users', existingUsers);
         
-        socket.to(roomId).emit('user-connected', userId, userName);
+        // THEN notify others (with small delay to ensure client is ready)
+        setTimeout(() => {
+            socket.to(roomId).emit('user-connected', socket.id, userName);
+        }, 100);
         
         console.log(`Room ${roomId} now has ${room.size} users`);
     });
@@ -79,23 +101,25 @@ io.on('connection', (socket) => {
         console.log('Client disconnected:', socket.id);
         
         rooms.forEach((room, roomId) => {
-            room.forEach((user, userId) => {
-                if (user.socketId === socket.id) {
-                    room.delete(userId);
-                    socket.to(roomId).emit('user-disconnected', userId);
-                    console.log(`User ${userId} disconnected from room ${roomId}`);
-                    
-                    if (room.size === 0) {
-                        rooms.delete(roomId);
-                        console.log(`Room ${roomId} is now empty and removed`);
-                    }
+            if (room.has(socket.id)) {
+                const user = room.get(socket.id);
+                room.delete(socket.id);
+                
+                socket.to(roomId).emit('user-disconnected', socket.id);
+                console.log(`User ${user.name} disconnected from room ${roomId}`);
+                
+                if (room.size === 0) {
+                    rooms.delete(roomId);
+                    console.log(`Room ${roomId} is now empty and removed`);
                 }
-            });
+            }
         });
     });
 });
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-    console.log(`Server running on port ${PORT}`);
+    console.log(`✅ Server running on port ${PORT}`);
+    console.log(`📡 Local: http://localhost:${PORT}`);
+    console.log(`🌐 Network: http://192.168.18.4:${PORT}`);
 });

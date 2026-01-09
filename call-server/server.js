@@ -91,6 +91,6 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`✅ Signaling server running on port ${PORT}`);
   console.log(`📡 Local: http://localhost:${PORT}`);
-  console.log(`📡 Network: http://192.168.18.4:${PORT}`);
+  console.log(`📡 Network: http://<IP_ADDRESS>:${PORT}`); // replace ip address
   console.log(`🌐 Access from other devices using your network IP`);
 });

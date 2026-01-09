@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname)));
 
 // Serve index.html for root route
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, 'call.html'));
 });
 
 // Initialize Socket.IO
@@ -121,5 +121,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`✅ Server running on port ${PORT}`);
     console.log(`📡 Local: http://localhost:${PORT}`);
-    console.log(`🌐 Network: http://192.168.18.4:${PORT}`);
+    console.log(`🌐 Network: http://<IP_ADDRESS>:${PORT}`); // replace ip address
 });

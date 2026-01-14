@@ -22,15 +22,15 @@ app.get('/', (req, res) => {
 });
 
 // Initialize Socket.IO
-const io = socketIo(server, {
-    cors: {
-        origin: '*',
-        methods: ['GET', 'POST']
-    },
-    transports: ['websocket', 'polling'],
-    pingTimeout: 60000,
-    pingInterval: 25000
-});
+//const io = socketIo(server, {
+ //   cors: {
+//     origin: '*',
+ //       methods: ['GET', 'POST']
+ //   },
+ //   transports: ['websocket', 'polling'],
+  //  pingTimeout: 60000,
+   // pingInterval: 25000
+// });
 
 // Store active rooms and users
 const rooms = new Map();
